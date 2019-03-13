@@ -1,0 +1,23 @@
+{
+  "name": "graphql",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000g\u0000r\u0000a\u0000p\u0000h\u0000Q\u0000L\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "scripts": {
+    "start": "babel-node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/developer-dipankar/graphQL.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/developer-dipankar/graphQL/issues"
+  },
+  "homepage": "https://github.com/developer-dipankar/graphQL#readme",
+  "dependencies": {
+    "graphql-yoga": "^1.17.4"
+  }
+}

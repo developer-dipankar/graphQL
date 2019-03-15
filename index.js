@@ -1,14 +1,14 @@
 import { GraphQLServer } from 'graphql-yoga';
 
 const users = [
-    {id: '1', fullname: 'Andrew', email: 'abc@domain.com', age: 29, isActive: true},
-    {id: '2', fullname: 'Molly', email: 'abc@domain.com', age: 29, isActive: true},
-    {id: '3', fullname: 'Hayden', email: 'abc@domain.com', age: 29, isActive: true},
-    {id: '4', fullname: 'Jitendra', email: 'abc@domain.com', age: 29, isActive: true},
-    {id: '5', fullname: 'Somen Gadha', email: 'abc@domain.com', age: 29, isActive: true},
-    {id: '6', fullname: 'Abhijit Chagol', email: 'abc@domain.com', age: 29, isActive: true},
-    {id: '7', fullname: 'Gandu', email: 'abc@domain.com', age: 29, isActive: true},
-    {id: '8', fullname: 'Pagla C***a', email: 'abc@domain.com', age: 29, isActive: true},
+    {id: '1', fullname: 'Andrew', email: 'abc@domain.com', age: 29, isActive: true, posts: [1,2]},
+    {id: '2', fullname: 'Molly', email: 'abc@domain.com', age: 29, isActive: true, posts: [1,3]},
+    {id: '3', fullname: 'Hayden', email: 'abc@domain.com', age: 29, isActive: true, posts: [3,2]},
+    {id: '4', fullname: 'Jitendra', email: 'abc@domain.com', age: 29, isActive: true, posts: [1,4]},
+    {id: '5', fullname: 'Somen Gadha', email: 'abc@domain.com', age: 29, isActive: true, posts: [1,2,5]},
+    {id: '6', fullname: 'Abhijit Chagol', email: 'abc@domain.com', age: 29, isActive: true, posts: [1,5]},
+    {id: '7', fullname: 'Gandu', email: 'abc@domain.com', age: 29, isActive: true, posts: [1,3]},
+    {id: '8', fullname: 'Pagla C***a', email: 'abc@domain.com', age: 29, isActive: true, posts: [1,4]},
 ]
 
 const posts = [
@@ -37,6 +37,7 @@ const typeDefs = `
         email: String!
         age: Int!
         isActive: Boolean!
+        posts: [Post!]!
     }
 
     type Post {
@@ -109,6 +110,14 @@ const resolvers = {
                     bodyMatch = item.body.toLowerCase().includes(args.Query.toLowerCase())
                 }
                 return titleMatch || bodyMatch;
+            })
+        }
+    },
+    User: {
+        posts(parent, args, ctx, info) {
+            // console.log(parent.posts)
+            return posts.filter((item) => {
+                return parent.posts.includes(parseInt(item.id))
             })
         }
     }

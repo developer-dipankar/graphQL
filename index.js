@@ -1,13 +1,33 @@
 import { GraphQLServer } from 'graphql-yoga';
 
+const users = [
+    {id: '1', fullname: 'Andrew', email: 'abc@domain.com', age: 29, isActive: true},
+    {id: '2', fullname: 'Molly', email: 'abc@domain.com', age: 29, isActive: true},
+    {id: '3', fullname: 'Hayden', email: 'abc@domain.com', age: 29, isActive: true},
+    {id: '4', fullname: 'Jitendra', email: 'abc@domain.com', age: 29, isActive: true},
+    {id: '5', fullname: 'Somen Gadha', email: 'abc@domain.com', age: 29, isActive: true},
+    {id: '6', fullname: 'Abhijit Chagol', email: 'abc@domain.com', age: 29, isActive: true},
+    {id: '7', fullname: 'Gandu', email: 'abc@domain.com', age: 29, isActive: true},
+    {id: '8', fullname: 'Pagla C***a', email: 'abc@domain.com', age: 29, isActive: true},
+]
+
+const posts = [
+    {id: '1', title: 'A Blog', body: null, isPublished: true},
+    {id: '2', title: 'B Blog', body: 'Blog A', isPublished: true},
+    {id: '3', title: 'C Blog', body: null, isPublished: true},
+    {id: '4', title: 'D Blog', body: null, isPublished: true},
+    {id: '5', title: 'E Blog', body: null, isPublished: true},
+]
+
 const typeDefs = `
     type Query {
+        users(Query: String): [User!]!
         greetings(fname: String, lname: String): String!
         add(a: Float, b: Float): Float!
         addArray(numbers: [Float!]!): Float!
         me: User!
         post: Post!
-        posts: [Post!]
+        posts(Query: String): [Post!]!
         grades: [Int!]
     }
 
@@ -35,6 +55,12 @@ const resolvers = {
             } else {
                 return 'Hello User'
             }
+        },
+        users(parent, args, ctx, info) {
+            if (!args.Query) {
+                return users;
+            }
+            return users.filter((item) => {return item.fullname.toLowerCase().includes(args.Query.toLowerCase())})
         },
         addArray(parent, args, ctx, info) {
             if (args.numbers.length === 0) {
@@ -69,13 +95,21 @@ const resolvers = {
                 isPublished: false
             }
         },
-        posts() {
-            return [
-                {id: '8787', title: 'Post 1', body: null, isPublished: false},
-                {id: '67676', title: 'Post 2', body: 'dsfsd', isPublished: true},
-                {id: '7647', title: 'Post 3', body: '', isPublished: false},
-                {id: '4355', title: 'Post 4', body: '', isPublished: true},
-            ]
+        posts(parent, args, ctx, info) {
+            if(!args.Query) {
+                return posts;
+            }
+            return posts.filter((item) => {
+                let titleMatch = null;
+                let bodyMatch = null;
+                if(item.title) {
+                    titleMatch = item.title.toLowerCase().includes(args.Query.toLowerCase())
+                }
+                if(item.body) {
+                    bodyMatch = item.body.toLowerCase().includes(args.Query.toLowerCase())
+                }
+                return titleMatch || bodyMatch;
+            })
         }
     }
 }

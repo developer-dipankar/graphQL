@@ -4,8 +4,11 @@ const typeDefs = `
     type Query {
         greetings(fname: String, lname: String): String!
         add(a: Float, b: Float): Float!
+        addArray(numbers: [Float!]!): Float!
         me: User!
         post: Post!
+        posts: [Post!]
+        grades: [Int!]
     }
 
     type User {
@@ -19,7 +22,7 @@ const typeDefs = `
     type Post {
         id: String!
         title: String!
-        body: String!
+        body: String
         isPublished: Boolean!
     }
 `
@@ -32,6 +35,19 @@ const resolvers = {
             } else {
                 return 'Hello User'
             }
+        },
+        addArray(parent, args, ctx, info) {
+            if (args.numbers.length === 0) {
+                return 0;
+            }
+            return args.numbers.reduce((prevValue, currentValue) => {
+                return prevValue + currentValue;
+            })
+        },
+        grades() {
+            // return null;
+            // return [];
+            return [99, 100, 105];
         },
         add(parent, args, ctx, info) {
             return args.a + args.b 
@@ -49,9 +65,17 @@ const resolvers = {
             return {
                 id: '987654',
                 title: 'Lorem Ipsum',
-                body: '',
+                body: null,
                 isPublished: false
             }
+        },
+        posts() {
+            return [
+                {id: '8787', title: 'Post 1', body: null, isPublished: false},
+                {id: '67676', title: 'Post 2', body: 'dsfsd', isPublished: true},
+                {id: '7647', title: 'Post 3', body: '', isPublished: false},
+                {id: '4355', title: 'Post 4', body: '', isPublished: true},
+            ]
         }
     }
 }

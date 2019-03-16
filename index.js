@@ -35,6 +35,7 @@ const typeDefs = `
     type Mutation {
         createUser(fullname: String!, email: String!, age: Int!): User!
         createPost(data: CreatePostInput): Post!
+        deleteUser(id: ID!): String!
     }
 
     input CreatePostInput {
@@ -160,6 +161,16 @@ const resolvers = {
 
             posts.push(post);
             return post
+        },
+
+        deleteUser(parent, args, ctx, info) {
+            const userIndex = users.findIndex((item) => item.id === args.id)
+            if (userIndex === -1) {
+                throw new Error('User not found');
+            }
+
+            users.splice(userIndex, 1);
+            return 'User deleted successfull'
         }
     }
 }

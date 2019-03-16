@@ -1,4 +1,5 @@
 import { GraphQLServer } from 'graphql-yoga';
+import uuidv4 from 'uuid/v4';
 
 const users = [
     {id: '1', fullname: 'Andrew Parker', email: 'abc@domain.com', age: 29, isActive: true, posts: [1,2]},
@@ -31,12 +32,16 @@ const typeDefs = `
         grades: [Int!]
     }
 
+    type Mutation {
+        createUser(fullname: String!, email: String!, age: Int!): User!
+    }
+
     type User {
         id: String!
         fullname: String!
         email: String!
-        age: Int!
-        isActive: Boolean!
+        age: Int
+        isActive: Boolean
         posts: [Post!]!
     }
 
@@ -116,9 +121,30 @@ const resolvers = {
     User: {
         posts(parent, args, ctx, info) {
             // console.log(parent.posts)
-            return posts.filter((item) => {
-                return parent.posts.includes(parseInt(item.id))
-            })
+            if (parent.posts !== undefined) {
+                return posts.filter((item) => {
+                    return parent.posts.includes(parseInt(item.id))
+                })
+            }
+            return []
+        }
+    },
+    Mutation: {
+        createUser(parent, args, ctx, info) {
+            const emailTaken = users.some((item) => item.email === args.email)
+            if (emailTaken) {
+                throw new Error('Email is already existed')
+            }
+
+            const user = {
+                id: uuidv4(),
+                fullname: args.fullname,
+                email: args.email,
+                age: args.age
+            }
+
+            users.push(user);
+            return user;
         }
     }
 }

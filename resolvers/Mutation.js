@@ -16,7 +16,7 @@ const Mutation = {
         return user;
     },
 
-    updateUser(parent, {id, data}, {db}, info) {
+    updateUser(parent, {id, data}, {db, pubsub}, info) {
         const checkUser = db.users.findIndex((item) => item.id === id);
         if(checkUser === -1) {
             throw new Error('User not found');
@@ -42,8 +42,9 @@ const Mutation = {
         if(typeof data.isActive === 'boolean') {
             db.users[checkUser].isActive = data.isActive;
         }
-
-        return db.users[checkUser];
+        const user = db.users[checkUser];
+        pubsub.publish(`user ${id}`, {user})
+        return user;
     },
 
     createPost(parent, args, {db}, info) {

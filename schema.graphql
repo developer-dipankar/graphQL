@@ -16,6 +16,10 @@ type Mutation {
     updateUser(id: ID!, data: UpdateUserInput!): User!
 }
 
+type Subscription {
+    count: Int!
+}
+
 input UpdateUserInput {
     fullname: String, 
     email: String, 

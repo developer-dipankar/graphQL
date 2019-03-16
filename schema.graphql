@@ -13,6 +13,14 @@ type Mutation {
     createUser(fullname: String!, email: String!, age: Int!): User!
     createPost(data: CreatePostInput): Post!
     deleteUser(id: ID!): String!
+    updateUser(id: ID!, data: UpdateUserInput!): User!
+}
+
+input UpdateUserInput {
+    fullname: String, 
+    email: String, 
+    age: Int,
+    isActive: Boolean
 }
 
 input CreatePostInput {

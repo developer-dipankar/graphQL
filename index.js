@@ -1,65 +1,6 @@
 import { GraphQLServer } from 'graphql-yoga';
 import uuidv4 from 'uuid/v4';
-
-const users = [
-    {id: '1', fullname: 'Andrew Parker', email: 'abc@domain.com', age: 29, isActive: true, posts: [1,2]},
-    {id: '2', fullname: 'Molly Duncan', email: 'abc@domain.com', age: 29, isActive: true, posts: [1,3]},
-    {id: '3', fullname: 'Steve Smith', email: 'abc@domain.com', age: 29, isActive: true, posts: [3,2]},
-    {id: '4', fullname: 'Prithi Potolkumari', email: 'abc@domain.com', age: 29, isActive: true, posts: [1,4]},
-    {id: '5', fullname: 'Ken Takla', email: 'abc@domain.com', age: 29, isActive: true, posts: [1,2,5]},
-    {id: '6', fullname: 'Leo Kabla', email: 'abc@domain.com', age: 29, isActive: true, posts: [1,5]},
-    {id: '7', fullname: 'Kaan dhore mule debo', email: 'abc@domain.com', age: 29, isActive: true, posts: [1,3]},
-    {id: '8', fullname: 'Keliye laat kore debo', email: 'abc@domain.com', age: 29, isActive: true, posts: [1,4]},
-]
-
-const posts = [
-    {id: '1', title: 'A Blog', body: null, isPublished: true},
-    {id: '2', title: 'B Blog', body: 'Blog A', isPublished: true},
-    {id: '3', title: 'C Blog', body: null, isPublished: true},
-    {id: '4', title: 'D Blog', body: null, isPublished: true},
-    {id: '5', title: 'E Blog', body: null, isPublished: true},
-]
-
-const typeDefs = `
-    type Query {
-        users(Query: String): [User!]!
-        greetings(fname: String, lname: String): String!
-        add(a: Float, b: Float): Float!
-        addArray(numbers: [Float!]!): Float!
-        me: User!
-        post: Post!
-        posts(Query: String): [Post!]!
-        grades: [Int!]
-    }
-
-    type Mutation {
-        createUser(fullname: String!, email: String!, age: Int!): User!
-        createPost(data: CreatePostInput): Post!
-        deleteUser(id: ID!): String!
-    }
-
-    input CreatePostInput {
-        title: String!
-        body: String
-        isPublished: Boolean!
-    }
-
-    type User {
-        id: String!
-        fullname: String!
-        email: String!
-        age: Int
-        isActive: Boolean
-        posts: [Post!]!
-    }
-
-    type Post {
-        id: String!
-        title: String!
-        body: String
-        isPublished: Boolean!
-    }
-`
+import db from './db';
 
 const resolvers = {
     Query: {
@@ -72,9 +13,9 @@ const resolvers = {
         },
         users(parent, args, ctx, info) {
             if (!args.Query) {
-                return users;
+                return ctx.db.users;
             }
-            return users.filter((item) => {return item.fullname.toLowerCase().includes(args.Query.toLowerCase())})
+            return ctx.db.users.filter((item) => {return item.fullname.toLowerCase().includes(args.Query.toLowerCase())})
         },
         addArray(parent, args, ctx, info) {
             if (args.numbers.length === 0) {
@@ -109,11 +50,11 @@ const resolvers = {
                 isPublished: false
             }
         },
-        posts(parent, args, ctx, info) {
+        posts(parent, args, {db}, info) {
             if(!args.Query) {
-                return posts;
+                return db.posts;
             }
-            return posts.filter((item) => {
+            return db.posts.filter((item) => {
                 let titleMatch = null;
                 let bodyMatch = null;
                 if(item.title) {
@@ -127,10 +68,10 @@ const resolvers = {
         }
     },
     User: {
-        posts(parent, args, ctx, info) {
+        posts(parent, args, {db}, info) {
             // console.log(parent.posts)
             if (parent.posts !== undefined) {
-                return posts.filter((item) => {
+                return db.posts.filter((item) => {
                     return parent.posts.includes(parseInt(item.id))
                 })
             }
@@ -138,8 +79,8 @@ const resolvers = {
         }
     },
     Mutation: {
-        createUser(parent, args, ctx, info) {
-            const emailTaken = users.some((item) => item.email === args.email)
+        createUser(parent, args, {db}, info) {
+            const emailTaken = db.users.some((item) => item.email === args.email)
             if (emailTaken) {
                 throw new Error('Email is already existed')
             }
@@ -149,31 +90,37 @@ const resolvers = {
                 ...args
             }
 
-            users.push(user);
+            db.users.push(user);
             return user;
         },
 
-        createPost(parent, args, ctx, info) {
+        createPost(parent, args, {db}, info) {
             const post = {
                 id: uuidv4(),
                 ...args.data
             }
 
-            posts.push(post);
+            db.posts.push(post);
             return post
         },
 
-        deleteUser(parent, args, ctx, info) {
-            const userIndex = users.findIndex((item) => item.id === args.id)
+        deleteUser(parent, args, {db}, info) {
+            const userIndex = db.users.findIndex((item) => item.id === args.id)
             if (userIndex === -1) {
                 throw new Error('User not found');
             }
 
-            users.splice(userIndex, 1);
+            db.users.splice(userIndex, 1);
             return 'User deleted successfull'
         }
     }
 }
 
-const server = new GraphQLServer({typeDefs, resolvers});
+const server = new GraphQLServer({
+    'typeDefs': './schema.graphql',
+    resolvers,
+    context: {
+        db
+    }
+});
 server.start(() => console.log('GraphQL Server started'))
